@@ -15,8 +15,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Read about the data from the website where it is staged.  Then form three regression models; Model1 is SIMS~ARM, Model2 is SIMS~GRIP, and Model3 is SIMS~ARM+GRIP. For each model find a 95% prediction interval of SIMS given a value of 94  for GRIP and 88 for ARM. Compare Model1 with Model3 using anova. Write it up in a markdown document, push the project up to your github account and submit it back to canvas as link. 
 
- 
-
 
 ```{r include=FALSE}
 require(tidyverse)
@@ -35,46 +33,104 @@ data <- read.csv(file="https://onlinestatbook.com/case_studies_rvls/physical_str
 
 ### scatterplot
 
+```{r}
+plot(SIMS~ARM,data=data)
+model.1=lm(SIMS~ARM, data=data)
+abline(model.1)
+```
 
+This scattersplot shows that as the simulated stength increases so does the arm strength. It has a positive correlation.
 
 ### Numerical results
 
+```{r}
+cor(SIMS~ARM,data=data)
+```
+
+This number shows that there is a moderate positive correlation between SIMS and ARM with a number of 0.69.
 
 ### Inferential  (Build model.1)
 
+```{r}
+summary.lm(model.1)
+```
+
+Model.1 shows that the intercepts and coefficient of ARM are both significantly different from 0. The intercept is -4.095 while the ARM coefficient is 0.055. The P values are 2.2e-16 which are significantly lower than 0.05.
+
 #### Predict at target point
 
+```{r}
+targtPoint = data.frame(GRIP=94, ARM=88)
+predictInt = predict(model.1,targtPoint, interval = 'prediction')
+print(predictInt)
+```
 
-#### scatterplot with model fit
-  
+
+At ARM=88, GRIP=94, the predicted SIMS score is 0.706. 95% confidence interval for that score is SIMS between -1.73 and 3.14.
+
 
 ## Model 2 SIM~GRIP
 
 ### Now add in scatterplot
 
+```{r}
+plot(SIMS~GRIP,data=data)
+model.2=lm(SIMS~GRIP, data=data)
+abline(model.2)
+```  
+
+This scatterplot, just like model 1, shows that when the simulation increases so does the grip stength. Positive correlation.
 
 ### Numerical results 
 
+```{r}
+cor(SIMS~GRIP,data=data)
+```
+
+Again, similar to model.1, there seems to be a moderate positive correlation with SIMS and GRIP with the number being 0.64.
 
 ### Inferential  (Build model.2)
   
+```{r}
+summary.lm(model.2)
+```
+
+Model.2 shows that the intercepts and coefficient of ARM are both significantly different from 0. The intercept is -4.81 while the GRIP coefficient is 0.045. The P values are 2.2e-16 which are significantly lower than 0.05.
 
 #### predict model.2 at target point
 
-#### now add the model fit to our plot for model.2
-  
+```{r}
+targtPoint = data.frame(GRIP=94, ARM=88)
+predictInt = predict(model.2,targtPoint, interval = 'prediction')
+print(predictInt)
+```
+
+At ARM=88, GRIP=94, the predicted SIMS score is -0.536. 95% confidence interval for that score is SIMS between -3.108 and 2.036.
 
 
 ## Model 3 SIM~ARM+GRIP
 
+```{r}
+model.3 = lm(SIMS~ARM+GRIP, data=data)
+summary(model.3)
+```
+
+Model.3 shows that the intercepts and coefficient of ARM and GRIP are both significantly different from 0. The intercept for both GRIP and ARM seem to be -5.43 while the ARM coefficient is 0.037 and the Grip coefficient being 0.02.  The P value for all of these coefficients are much lower than 0.05, showing a difference between them both.
+
 ### Numerical results (cor)
 
-`
-  
-### Inferential  (Build 2-dimentional model.3)
+```{r}
+cor(data)
+```
+
+These numerical results demonstrate the correlation between each simulation and the grip or strength. The correlation between the simulation strength and the grip stength is 0.64 while the correlation between simulation strength and the arm strength is 0.69. These both prove to be a moderate positive correlation.
 
 #### predict model.3 at target point
-  
+```{r}
+predict(model.3, targtPoint,interval='prediction')
+```
+
+At ARM=88, GRIP=94, the predicted SIMS score is 0.15. 95% confidence interval for that score is SIMS between -2.132 and 2.431.
 
 ## Comparing nested models ANOVA Test
 
@@ -83,3 +139,16 @@ data <- read.csv(file="https://onlinestatbook.com/case_studies_rvls/physical_str
 
 ## Informally compare Model.1 with model.2
 
+```{r}
+anova_result <- anova(model.1, model.3)
+print(anova_result)
+```
+
+The comparison between model 1 and model 2 show that the P-value is 4.994e-06 which is less than 0.05 meaning that these two models are different from each other.
+
+```{r}
+anova_result <- anova(model.2, model.3)
+print(anova_result)
+```
+
+The comparison between model 2 and model 3 show that the P-value is 1.4953-09 which is significantly less than 0.05, proving that these two models are different from each other.
